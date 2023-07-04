@@ -1,17 +1,37 @@
+import * as path from 'path';
 import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Congratulations, your extension "touchmyfiles" is now active!');
+  console.log('Congratulations, your extension "touchmyfiles" is now active! 🎉');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('touchmyfiles.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World from TouchMyFiles!');
+  let disposable = vscode.commands.registerCommand('touchmyfiles.helloWorld', () => {
+    const activeEditor = vscode.window.activeTextEditor;
 
-	});
+    if (!activeEditor) {
+      vscode.window.showInformationMessage('Please open a file first!');
+      return;
+    }
 
-	context.subscriptions.push(disposable);
+    const activeEditerPath = activeEditor.document.uri.fsPath;
+
+    const editorDir = path.dirname(activeEditerPath);
+
+    vscode.window.showInformationMessage('dir: ' + editorDir);
+
+    vscode.window.showInputBox({ prompt: 'Enter the filename', placeHolder: 'e.g. package.json' })
+      .then(newFileName => {
+        if (!newFileName) {
+          vscode.window.showInformationMessage('No filename entered');
+          return;
+        }
+
+        const newFileUri = vscode.Uri.file(path.join(editorDir, newFileName));
+
+        vscode.workspace.fs.writeFile(newFileUri, new Uint8Array());
+      });
+  });
+
+  context.subscriptions.push(disposable);
 }
 
 // This method is called when your extension is deactivated
