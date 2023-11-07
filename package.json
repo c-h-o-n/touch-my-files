@@ -1,6 +1,6 @@
 {
-  "name": "touchmyfiles",
-  "displayName": "TouchMyFiles",
+  "name": "touch-my-files",
+  "displayName": "touch-my-files",
   "description": "Create files and folders relative to the editor.",
   "version": "0.0.1",
   "engines": {
@@ -14,7 +14,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "touchmyfiles.helloWorld",
+        "command": "touch-my-files.helloWorld",
         "title": "Hello World"
       }
     ]

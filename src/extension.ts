@@ -2,9 +2,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Congratulations, your extension "touchmyfiles" is now active! 🎉');
+  console.log('Congratulations, your extension "touch-my-files" is now active! 🎉');
 
-  let disposable = vscode.commands.registerCommand('touchmyfiles.helloWorld', () => {
+  let disposable = vscode.commands.registerCommand('touch-my-files.helloWorld', async () => {
     const activeEditor = vscode.window.activeTextEditor;
 
     if (!activeEditor) {

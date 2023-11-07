@@ -1,6 +1,6 @@
-# touchmyfiles README
+# touch-my-files README
 
-This is the README for your extension "touchmyfiles". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "touch-my-files". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 
