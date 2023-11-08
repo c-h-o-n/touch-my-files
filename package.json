@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "touch-my-files.helloWorld",
-        "title": "Hello World"
+        "command": "touch-my-files.touch",
+        "title": "touch-my-files: touch"
       }
     ]
   },
