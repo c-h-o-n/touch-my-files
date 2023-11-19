@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { showTouchPrompt } from '../lib/showTouchPrompt';
+import createFile from '../lib/createFile';
 
 export default async function touch() {
   const activeEditor = vscode.window.activeTextEditor;
@@ -23,14 +24,10 @@ export default async function touch() {
 
   const dirname = path.dirname(activeEditorPath || workspacePath);
 
-  const newFilePath = await showTouchPrompt(dirname);
+  const filePaths = await showTouchPrompt(dirname);
 
-  const saveLocation  = path.join(dirname, newFilePath);
-
-  console.log('Created new file as: ', newFilePath, '\nsaved to: ', saveLocation);
-
-  const newFileUri = vscode.Uri.file(saveLocation);
-  vscode.workspace.fs.writeFile(newFileUri, new Uint8Array());
+  filePaths.map(filePath => {
+    const saveLocation = path.join(dirname, filePath);
+    createFile(saveLocation);
+  });
 }
-
-
