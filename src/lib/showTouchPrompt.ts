@@ -16,7 +16,7 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
       .filter(dirent => dirent.isDirectory())
       .map(dirent => path.join(dirent.name, '/'));
 
-    quickPick.items = choices.map(choice => ({ label: choice }));
+    quickPick.items = choices.map(choice => ({ label: choice, iconPath: vscode.ThemeIcon.Folder }));
 
     let inputs: string[] = quickPick.value.split(' ');
     let latestInput: string = inputs[inputs.length - 1];
@@ -28,6 +28,7 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
       inputs = quickPick.value.split(' ');
       latestInput = inputs[inputs.length - 1];
 
+      // TODO show how many files will be generated
       quickPick.title = inputs.map(input => path.join(editorPath, input)).join('\n');
 
       try {
@@ -39,9 +40,17 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
         console.log("Dir doesn't exists");
       }
 
-      quickPick.items = [latestInput, ...choices]
-        .filter(value => value !== '')
-        .map(value => ({ label: value, alwaysShow: true }));
+      let quickPickItems: vscode.QuickPickItem[] = choices.map(value => ({
+        label: value,
+        iconPath: vscode.ThemeIcon.Folder,
+        alwaysShow: true,
+      }));
+
+      if (latestInput !== '') {
+        quickPickItems = [{ label: latestInput, iconPath: vscode.ThemeIcon.File, alwaysShow: true }, ...quickPickItems];
+      }
+
+      quickPick.items = [...quickPickItems];
     });
 
     quickPick.onDidAccept(() => {

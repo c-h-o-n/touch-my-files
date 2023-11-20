@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as braces from 'braces';
 
 import { showTouchPrompt } from '../lib/showTouchPrompt';
 import createFile from '../lib/createFile';
@@ -24,10 +25,13 @@ export default async function touch() {
 
   const dirname = path.dirname(activeEditorPath || workspacePath);
 
-  const filePaths = await showTouchPrompt(dirname);
+  const newFileNames = await showTouchPrompt(dirname);
 
-  filePaths.map(filePath => {
-    const saveLocation = path.join(dirname, filePath);
+  const bracedFileNames = newFileNames.map(fileName => braces.expand(fileName)).flat();
+  
+  bracedFileNames.map(fileName => {
+    console.log({ braced: fileName });
+    const saveLocation = path.join(dirname, fileName);
     createFile(saveLocation);
   });
 }
