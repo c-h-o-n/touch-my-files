@@ -44,17 +44,17 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
         console.log("Dir doesn't exists");
       }
 
-      let quickPickItems: vscode.QuickPickItem[] = choices.map(value => ({
+      const newQuickPickItems: vscode.QuickPickItem[] = choices.map(value => ({
         label: value,
         iconPath: vscode.ThemeIcon.Folder,
         alwaysShow: true,
       }));
 
       if (lastInput !== '') {
-        quickPickItems = [{ label: lastInput, iconPath: vscode.ThemeIcon.File, alwaysShow: true }, ...quickPickItems];
+        newQuickPickItems.unshift({ label: lastInput, iconPath: vscode.ThemeIcon.File, alwaysShow: true });
       }
 
-      quickPick.items = [...quickPickItems];
+      quickPick.items = [...newQuickPickItems];
     });
 
     quickPick.onDidAccept(() => {
