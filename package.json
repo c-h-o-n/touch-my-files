@@ -15,7 +15,7 @@
     "commands": [
       {
         "command": "touch-my-files.touch",
-        "title": "touch-my-files: touch"
+        "title": "touch-my-files: Create file(s)"
       }
     ]
   },

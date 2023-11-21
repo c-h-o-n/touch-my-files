@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as braces from 'braces';
 
 export async function showTouchPrompt(editorPath: string): Promise<string[]> {
   return new Promise(resolve => {
@@ -19,23 +20,26 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
     quickPick.items = choices.map(choice => ({ label: choice, iconPath: vscode.ThemeIcon.Folder }));
 
     let inputs: string[] = quickPick.value.split(' ');
-    let latestInput: string = inputs[inputs.length - 1];
+    let lastInput: string = inputs[inputs.length - 1];
+    let bracedInputs: string[] = inputs.map(input => braces.expand(input)).flat();
 
     quickPick.placeholder = path.relative(openedWorkspaces[0].uri.fsPath, editorPath) + '/';
     quickPick.title = 'Create new file relative to the currently opened in editor.';
 
     quickPick.onDidChangeValue(() => {
       inputs = quickPick.value.split(' ');
-      latestInput = inputs[inputs.length - 1];
+      lastInput = inputs[inputs.length - 1];
 
-      // TODO show how many files will be generated
-      quickPick.title = inputs.map(input => path.join(editorPath, input)).join('\n');
+      bracedInputs = inputs.map(input => braces.expand(input)).flat();
 
+      quickPick.title = 'You are about to create ' + bracedInputs.length + ' file(s)';
+
+      const currentlyScopedDir = lastInput.substring(0, lastInput.lastIndexOf('/'));
       try {
         choices = fs
-          .readdirSync(path.join(editorPath, latestInput), { withFileTypes: true })
+          .readdirSync(path.join(editorPath, currentlyScopedDir), { withFileTypes: true })
           .filter(dirent => dirent.isDirectory())
-          .map(dirent => path.join(latestInput, dirent.name, '/'));
+          .map(dirent => path.join(currentlyScopedDir, dirent.name, '/'));
       } catch (error) {
         console.log("Dir doesn't exists");
       }
@@ -46,8 +50,8 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
         alwaysShow: true,
       }));
 
-      if (latestInput !== '') {
-        quickPickItems = [{ label: latestInput, iconPath: vscode.ThemeIcon.File, alwaysShow: true }, ...quickPickItems];
+      if (lastInput !== '') {
+        quickPickItems = [{ label: lastInput, iconPath: vscode.ThemeIcon.File, alwaysShow: true }, ...quickPickItems];
       }
 
       quickPick.items = [...quickPickItems];
@@ -71,7 +75,7 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
         return;
       }
 
-      resolve(inputs.map(input => path.normalize(input)));
+      resolve(bracedInputs.map(input => path.normalize(input)));
       quickPick.hide();
     });
 
