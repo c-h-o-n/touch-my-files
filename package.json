@@ -2,9 +2,9 @@
   "name": "touch-my-files",
   "displayName": "touch-my-files",
   "description": "Create files and folders relative to the editor.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
-    "vscode": "^1.84.1"
+    "vscode": "^1.81.0"
   },
   "categories": [
     "Other"
@@ -35,7 +35,7 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "20.2.5",
-    "@types/vscode": "^1.84.1",
+    "@types/vscode": "^1.81.0",
     "@typescript-eslint/eslint-plugin": "^5.59.8",
     "@typescript-eslint/parser": "^5.59.8",
     "@vscode/test-electron": "^2.3.2",
