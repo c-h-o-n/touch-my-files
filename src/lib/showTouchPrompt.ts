@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as braces from 'braces';
+import * as fuzzy from 'fuzzy';
 
 export async function showTouchPrompt(editorPath: string): Promise<string[]> {
   return new Promise(resolve => {
@@ -11,16 +12,14 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
     }
 
     const quickPick = vscode.window.createQuickPick();
-
-    let choices: string[] = fs
+    let dirNames: string[] = fs
       .readdirSync(editorPath, { withFileTypes: true })
       .filter(dirent => dirent.isDirectory())
       .map(dirent => path.join(dirent.name, '/'));
 
-    quickPick.items = choices.map(choice => ({ label: choice, iconPath: vscode.ThemeIcon.Folder }));
+    quickPick.items = dirNames.map(dirName => ({ label: dirName, iconPath: vscode.ThemeIcon.Folder }));
 
     let inputs: string[] = quickPick.value.split(' ');
-    let lastInput: string = inputs[inputs.length - 1];
     let bracedInputs: string[] = inputs.map(input => braces.expand(input)).flat();
 
     quickPick.placeholder = path.relative(openedWorkspaces[0].uri.fsPath, editorPath) + '/';
@@ -28,15 +27,15 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
 
     quickPick.onDidChangeValue(() => {
       inputs = quickPick.value.split(' ');
-      lastInput = inputs[inputs.length - 1];
+      const lastInput = inputs[inputs.length - 1];
 
       bracedInputs = inputs.map(input => braces.expand(input)).flat();
-
       quickPick.title = 'You are about to create ' + bracedInputs.length + ' file(s)';
 
-      const currentlyScopedDir = lastInput.substring(0, lastInput.lastIndexOf('/'));
+      const currentlyScopedDir = path.normalize(lastInput.substring(0, lastInput.lastIndexOf('/')));
+
       try {
-        choices = fs
+        dirNames = fs
           .readdirSync(path.join(editorPath, currentlyScopedDir), { withFileTypes: true })
           .filter(dirent => dirent.isDirectory())
           .map(dirent => path.join(currentlyScopedDir, dirent.name, '/'));
@@ -44,13 +43,20 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
         console.log("Dir doesn't exists");
       }
 
-      const newQuickPickItems: vscode.QuickPickItem[] = choices.map(value => ({
+      const fuzzyFilteredDirNames = fuzzy.filter(getFuzzySearchTerm(lastInput), dirNames, {}).map(i => i.string);
+
+      const newQuickPickItems: vscode.QuickPickItem[] = fuzzyFilteredDirNames.map(value => ({
         label: value,
         iconPath: vscode.ThemeIcon.Folder,
         alwaysShow: true,
       }));
+      console.log({ dirNames, fuzzyFilteredDirNames, search: path.normalize(lastInput) });
 
-      if (lastInput !== '') {
+      if (
+        lastInput !== '' &&
+        !lastInput.endsWith('/') &&
+        !dirNames.some(dirName => path.normalize(lastInput) + '/' === dirName)
+      ) {
         newQuickPickItems.unshift({ label: lastInput, iconPath: vscode.ThemeIcon.File, alwaysShow: true });
       }
 
@@ -60,7 +66,7 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
     quickPick.onDidAccept(() => {
       const selection = quickPick.activeItems[0];
 
-      if (choices.find(choice => choice === selection.label)) {
+      if (dirNames.find(dirName => dirName === selection.label)) {
         if (inputs.length < 2) {
           quickPick.value = selection.label;
           return;
@@ -81,4 +87,12 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
 
     quickPick.show();
   });
+}
+
+function getFuzzySearchTerm(input: string) {
+  if (!input || path.normalize(input) === './') {
+    return '';
+  }
+
+  return path.normalize(input);
 }
