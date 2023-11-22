@@ -5,6 +5,14 @@ import * as braces from 'braces';
 import * as fuzzy from 'fuzzy';
 
 export async function showTouchPrompt(editorPath: string): Promise<string[]> {
+  function getFuzzySearchTerm(input: string) {
+    if (!input || path.normalize(input) === './') {
+      return '';
+    }
+
+    return path.normalize(input);
+  }
+
   return new Promise(resolve => {
     const openedWorkspaces = vscode.workspace.workspaceFolders;
     if (!openedWorkspaces) {
@@ -12,6 +20,7 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
     }
 
     const quickPick = vscode.window.createQuickPick();
+
     let dirNames: string[] = fs
       .readdirSync(editorPath, { withFileTypes: true })
       .filter(dirent => dirent.isDirectory())
@@ -45,11 +54,12 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
 
       const fuzzyFilteredDirNames = fuzzy.filter(getFuzzySearchTerm(lastInput), dirNames, {}).map(i => i.string);
 
-      const newQuickPickItems: vscode.QuickPickItem[] = fuzzyFilteredDirNames.map(value => ({
-        label: value,
+      const newQuickPickItems: vscode.QuickPickItem[] = fuzzyFilteredDirNames.map(dirName => ({
+        label: dirName,
         iconPath: vscode.ThemeIcon.Folder,
         alwaysShow: true,
       }));
+
       console.log({ dirNames, fuzzyFilteredDirNames, search: path.normalize(lastInput) });
 
       if (
@@ -57,7 +67,7 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
         !lastInput.endsWith('/') &&
         !dirNames.some(dirName => path.normalize(lastInput) + '/' === dirName)
       ) {
-        newQuickPickItems.unshift({ label: lastInput, iconPath: vscode.ThemeIcon.File, alwaysShow: true });
+        newQuickPickItems.unshift({ label: path.normalize(lastInput), iconPath: vscode.ThemeIcon.File, alwaysShow: true });
       }
 
       quickPick.items = [...newQuickPickItems];
@@ -87,12 +97,4 @@ export async function showTouchPrompt(editorPath: string): Promise<string[]> {
 
     quickPick.show();
   });
-}
-
-function getFuzzySearchTerm(input: string) {
-  if (!input || path.normalize(input) === './') {
-    return '';
-  }
-
-  return path.normalize(input);
 }
