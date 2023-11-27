@@ -1,13 +1,23 @@
 {
   "name": "touch-my-files",
+  "version": "1.0.0",
   "displayName": "touch-my-files",
   "description": "Create files and folders relative to the editor.",
-  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/c-h-o-n/touch-my-files",
+    "type": "git"
+  },
   "engines": {
     "vscode": "^1.81.0"
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "utils",
+    "files",
+    "new file",
+    "touch-like"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
@@ -19,6 +29,11 @@
       }
     ]
   },
+  "author": {
+    "name": "chon",
+    "url": "https://github.com/c-h-o-n"
+  },
+  "publisher": "chon",
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "webpack",
